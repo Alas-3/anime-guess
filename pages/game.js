@@ -20,8 +20,9 @@ const Game = () => {
     const fetchQuestions = async () => {
       try {
         const response = await axios.get(
-          `https://opentdb.com/api.php?amount=${numQuestions}&category=31&type=${questionType}`
+          `https://opentdb.com/api.php?amount=${numQuestions}&category=31&difficulty=${difficulty}&type=${questionType}`
         );
+        console.log('API Response:', response.data.results);
         if (response.data.results.length > 0) {
           const formattedQuestions = response.data.results.map((question) => {
             let options = questionType === 'multiple'
@@ -34,7 +35,9 @@ const Game = () => {
             };
           });
           setQuestions(formattedQuestions);
-          setCorrectAnswer(formattedQuestions[currentQuestionIndex].correct_answer);
+          setCorrectAnswer(formattedQuestions[0].correct_answer);
+        } else {
+          console.warn('No questions found for the selected criteria');
         }
       } catch (error) {
         console.error('Error fetching questions:', error);
@@ -44,7 +47,7 @@ const Game = () => {
     if (numQuestions && questionType) {
       fetchQuestions();
     }
-  }, [numQuestions, questionType]);
+  }, [numQuestions, questionType, difficulty]);
 
   const handleAnswerClick = (answer) => {
     setSelectedAnswer(answer);
@@ -92,7 +95,7 @@ const Game = () => {
           <div>
             <p className="text-lg mb-4 dark:text-gray-300">Question #{currentQuestionIndex + 1}</p>
             <h2 className="text-xl font-bold mb-4 dark:text-gray-200">
-              {questions[currentQuestionIndex]?.question ? htmlParser(questions[currentQuestionIndex].question) : ''}
+              {questions[currentQuestionIndex]?.question ? htmlParser(questions[currentQuestionIndex].question) : 'Loading question...'}
             </h2>
             <div className="grid grid-cols-1 gap-4">
               {questions[currentQuestionIndex]?.options.map((option, index) => (
