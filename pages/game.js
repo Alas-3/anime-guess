@@ -1,14 +1,12 @@
-// pages/game.js
-
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import ReactHtmlParser from 'react-html-parser';
+import htmlParser from 'html-react-parser'; // Import html-react-parser
 import { shuffleArray } from '../utils/arrayUtils'; // Import shuffleArray function
 
 const Game = () => {
   const router = useRouter();
-  const { difficulty, numQuestions, questionType } = router.query; // Retrieve query parameters from router
+  const { difficulty, numQuestions, questionType } = router.query;
 
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -16,7 +14,7 @@ const Game = () => {
   const [correctAnswer, setCorrectAnswer] = useState('');
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
-  const [answerStatus, setAnswerStatus] = useState(''); // State to track answer status (correct or incorrect)
+  const [answerStatus, setAnswerStatus] = useState('');
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -28,7 +26,7 @@ const Game = () => {
           const formattedQuestions = response.data.results.map((question) => {
             let options = questionType === 'multiple'
               ? shuffleArray([...question.incorrect_answers, question.correct_answer])
-              : ['True', 'False']; // Only shuffle options if in multiple-choice mode
+              : ['True', 'False'];
 
             return {
               ...question,
@@ -67,11 +65,10 @@ const Game = () => {
       }
       setSelectedAnswer('');
       setAnswerStatus('');
-    }, 1000); // Delay for 1 second before moving to next question or showing result
+    }, 1000);
   };
 
   const handleRestart = () => {
-    // Redirect to results page
     router.push({
       pathname: '/result',
       query: { score: score, totalQuestions: questions.length },
@@ -95,7 +92,7 @@ const Game = () => {
           <div>
             <p className="text-lg mb-4 dark:text-gray-300">Question #{currentQuestionIndex + 1}</p>
             <h2 className="text-xl font-bold mb-4 dark:text-gray-200">
-              {ReactHtmlParser(questions[currentQuestionIndex]?.question)}
+              {questions[currentQuestionIndex]?.question ? htmlParser(questions[currentQuestionIndex].question) : ''}
             </h2>
             <div className="grid grid-cols-1 gap-4">
               {questions[currentQuestionIndex]?.options.map((option, index) => (
@@ -111,7 +108,7 @@ const Game = () => {
                   }`}
                   disabled={selectedAnswer !== ''}
                 >
-                  {ReactHtmlParser(option)}
+                  {htmlParser(option)}
                   {selectedAnswer === option && (
                     <span
                       className={`absolute inset-0 bg-opacity-0 transition-opacity duration-500 ${
@@ -119,7 +116,6 @@ const Game = () => {
                       }`}
                     ></span>
                   )}
-                  {/* Visual indicator */}
                   {selectedAnswer === option && answerStatus === 'correct' && (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
